@@ -32,7 +32,7 @@ jobs:
           username: ${{ secrets.SERVER_USER }} # 引用 GitHub Secrets 中的用户名
           password: ${{ secrets.SERVER_PASS }} # 引用 GitHub Secrets 中的密码
           source: "./docker-compose.yml,./Dockerfile,./target/*.jar"
-          target: /usr/local/apps/myApp/    # 上传到服务器的目标目录
+          target: /usr/local/projects/imags-lib-all/    # 上传到服务器的目标目录
           overwrite: true  #文件覆盖模式
 
       # 5. 通过ssh执行shell命令，在服务器上构建镜像并部署
@@ -43,7 +43,7 @@ jobs:
           username: ${{ secrets.SERVER_USER }} # 引用 GitHub Secrets 中的用户名
           password: ${{ secrets.SERVER_PASS }} # 引用 GitHub Secrets 中的密码
           script: |
-            cd /usr/local/apps/myApp/
+            cd /usr/local/projects/imags-lib-all/
             docker-compose down                  # 停止现有服务
             docker-compose up -d --build         # 以守护模式启动服务 并且强制构建一次镜像
 
