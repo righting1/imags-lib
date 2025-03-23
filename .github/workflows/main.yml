@@ -34,6 +34,10 @@ jobs:
           source: "./docker-compose.yml,./Dockerfile,./target/*.jar"
           target: /usr/local/projects/imags-lib-all/    # 上传到服务器的目标目录
           overwrite: true  #文件覆盖模式
+          strip_components: 1
+          script: |
+           sudo chown -R righting:righting /usr/local/projects/imags-lib-all/
+           sudo chmod -R 755 /usr/local/projects/imags-lib-all/
 
       # 5. 通过ssh执行shell命令，在服务器上构建镜像并部署
       - name: 在服务器上构建镜像并部署
