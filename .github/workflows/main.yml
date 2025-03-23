@@ -47,7 +47,10 @@ jobs:
           username: ${{ secrets.SERVER_USER }} # 引用 GitHub Secrets 中的用户名
           password: ${{ secrets.SERVER_PASS }} # 引用 GitHub Secrets 中的密码
           script: |
+            sudo usermod -aG docker $USER
+            sudo systemctl start docker
             cd /usr/local/projects/imags-lib-all/
-            docker-compose down                  # 停止现有服务
-            docker-compose up -d --build         # 以守护模式启动服务 并且强制构建一次镜像
+            sudo docker-compose down                  # 停止现有服务
+            sudo docker-compose up -d --build         # 以守护模式启动服务 并且强制构建一次镜像
+            
 
