@@ -33,7 +33,7 @@ jobs:
           username: ${{ secrets.SERVER_USER }} # 引用 GitHub Secrets 中的用户名
           password: ${{ secrets.SERVER_PASS }} # 引用 GitHub Secrets 中的密码
           source: "./docker-compose.yml,./Dockerfile,./target/*.jar"
-          target: /usr/local/projects/imags-lib-all/    # 上传到服务器的目标目录
+          target: /usr/local/projects/imags-lib-all/target    # 上传到服务器的目标目录
           overwrite: true  #文件覆盖模式
           strip_components: 1
           script: |
