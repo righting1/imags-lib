@@ -10,6 +10,7 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     steps:
+      -
       # 1. 检出代码
       - name: 检出代码
         uses: actions/checkout@v3
@@ -38,6 +39,16 @@ jobs:
           script: |
            sudo chown -R righting:righting /usr/local/projects/imags-lib-all/
            sudo chmod -R 755 /usr/local/projects/imags-lib-all/
+
+      - name: 启动 MySQL 和 Redis
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          password: ${{ secrets.SERVER_PASS }}
+          script: |
+            docker run -d --name mysql-container -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=shizhan -e MYSQL_USER=root -e MYSQL_PASSWORD=root -p 3306:3306 mysql:8.0
+            docker run -d --name redis-container -p 6379:6379 redis:latest
 
       # 5. 通过ssh执行shell命令，在服务器上构建镜像并部署
       - name: 在服务器上构建镜像并部署

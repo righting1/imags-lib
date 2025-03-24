@@ -1,0 +1,15 @@
+services:
+  redis:
+    image: redis:7.0
+    container_name: redis-cache
+    volumes:
+      - /usr/local/projects/imags-lib-all/redis-cache:/var/lib/redis
+    ports:
+      - "6380:6379"  #左边是外界的端口，右边是服务器的端口
+    restart: always
+    networks:
+      - app_network
+
+networks:
+  app_network:
+    driver: bridge

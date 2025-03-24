@@ -1,0 +1,19 @@
+#生产环境配置
+spring:
+  # 数据库配置
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://20.243.123.1:3307/imagsLibDb
+    username: root
+    password: root
+  # Redis 配置
+  redis:
+    database: 0
+    host: 20.243.123.1
+    port: 6380
+    timeout: 5000
+  # Session 配置
+  session:
+    store-type: redis
+    # session 30 天后过期
+    timeout: 2592000

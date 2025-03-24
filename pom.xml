@@ -41,19 +41,20 @@
         </dependency>
 
 
-        <!-- Redis
+        <!-- Redis  -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-redis</artifactId>
         </dependency>
-        -->
 
-        <!-- Spring Session + Redis
+
+
+        <!-- Spring Session + Redis  -->
         <dependency>
             <groupId>org.springframework.session</groupId>
             <artifactId>spring-session-data-redis</artifactId>
         </dependency>
-        -->
+
 
         <!-- 本地缓存 Caffeine -->
         <dependency>
@@ -72,13 +73,13 @@
             <artifactId>disruptor</artifactId>
             <version>3.4.2</version>
         </dependency>
-        <!-- Sa-Token 权限认证
+        <!-- Sa-Token 权限认证   -->
         <dependency>
             <groupId>cn.dev33</groupId>
             <artifactId>sa-token-spring-boot-starter</artifactId>
             <version>1.39.0</version>
         </dependency>
-        -->
+
         <!-- Sa-Token 整合 Redis （使用 jackson 序列化方式）
         <dependency>
             <groupId>cn.dev33</groupId>
@@ -86,12 +87,14 @@
             <version>1.39.0</version>
         </dependency>
         -->
-        <!-- 提供Redis连接池
+
+        <!-- 提供Redis连接池  -->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-pool2</artifactId>
         </dependency>
-         -->
+
+
         <!-- 分库分表 -->
         <dependency>
             <groupId>org.apache.shardingsphere</groupId>
@@ -157,8 +160,29 @@
         </dependencies>
     </dependencyManagement>
 
+
+
+
     <build>
+
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.3.1</version>
+                <configuration>
+                    <filters>
+                        <filter>src/main/resources/config.properties</filter>
+                    </filters>
+                    <resources>
+                        <resource>
+                            <directory>src/main/resources</directory>
+                            <filtering>true</filtering>  <!-- 启用 ${} 替换 -->
+                        </resource>
+                    </resources>
+                </configuration>
+            </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -169,6 +193,7 @@
                     <encoding>UTF-8</encoding>
                 </configuration>
             </plugin>
+
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
@@ -184,6 +209,31 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+
+            <!--      docker配置-->
+            <!-- docker插件-->
+            <plugin>
+                <groupId>com.spotify</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <version>0.4.13</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>javax.activation</groupId>
+                        <artifactId>activation</artifactId>
+                        <version>1.1</version>
+                    </dependency>
+                </dependencies>
+
+                <configuration>
+                    <!-- 远程Docker的地址 -->
+                    <!--我这里最开始时想设置一个属性，来给服务器的ip,因为我这个服务器的ip不是静态的，每次重启ip都会改变 -->
+                     <dockerHost>http://20.243.123.1:2375</dockerHost>
+                    <!-- 镜像名称、前缀、项目名 -->
+                     <imageName> sxl/imags-lib-all:latest</imageName>
+                    <!-- Dockerfile的位置  -->
+                    <dockerDirectory>src/main/docker</dockerDirectory>
+                </configuration>
             </plugin>
         </plugins>
     </build>

@@ -1,0 +1,19 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: imagsLibDb
+    #      MYSQL_USER: root
+    #      MYSQL_PASSWORD: root
+    ports:
+      - "3307:3306"
+    volumes:
+      - /usr/local/projects/imags-lib-all/mysql-db:/var/lib/mysql
+    networks:
+      - app_network
+
+networks:
+  app_network:
+    driver: bridge

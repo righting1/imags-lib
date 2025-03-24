@@ -30,29 +30,31 @@ RUN ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 WORKDIR /usr/local/projects/imags-lib-all/
 
 # 复制 JAR 包到指定目录
-RUN mkdir -p imags-lib-backend mysql-db redis-cache
+#RUN mkdir -p imags-lib-backend mysql-db redis-cache
 
-COPY target/imags-lib-1.0-SNAPSHOT.jar imags-lib-backend/imags-lib.jar
+#COPY ./target/imags-lib-1.0-SNAPSHOT.jar imags-lib-backend/imags-lib.jar
+COPY target/imags-lib-1.0-SNAPSHOT.jar /imags-lib.jar
 
 # 暴露应用、MySQL、Redis 端口
-EXPOSE 8123 3306 6379
+EXPOSE 8123 3307 6380
+#EXPOSE 8123
 
 # 启动脚本（无需额外创建文件）
-ENTRYPOINT ["sh", "-c", "
-  mkdir -p /usr/local/projects/imags-lib-all/{imags-lib-backend,mysql-db,redis-cache} && \
-  if [ \"$SERVICE\" = 'app' ]; then
-    cd /usr/local/projects/imags-lib-all/imags-lib-backend && \
-    java -jar $JAVA_OPTS ./imags-lib.jar;
-  elif [ \"$SERVICE\" = 'mysql' ]; then
-    cd /usr/local/projects/imags-lib-all/mysql-db && \
-    docker-entrypoint.sh mysqld;
-  elif [ \"$SERVICE\" = 'redis' ]; then
-    cd /usr/local/projects/imags-lib-all/redis-cache && \
-    redis-server;
-  else
-    echo 'Unknown service type. Please set SERVICE=app, SERVICE=mysql, or SERVICE=redis';
-    exit 1;
-  fi
-"
-]
-
+# ENTRYPOINT ["sh", "-c", "
+#   mkdir -p /usr/local/projects/imags-lib-all/{imags-lib-backend,mysql-db,redis-cache} && \
+#   if [ \"$SERVICE\" = 'app' ]; then
+#     cd /usr/local/projects/imags-lib-all/imags-lib-backend && \
+#     java -jar $JAVA_OPTS ./imags-lib.jar;
+#   elif [ \"$SERVICE\" = 'mysql' ]; then
+#     cd /usr/local/projects/imags-lib-all/mysql-db && \
+#     docker-entrypoint.sh mysqld;
+#   elif [ \"$SERVICE\" = 'redis' ]; then
+#     cd /usr/local/projects/imags-lib-all/redis-cache && \
+#     redis-server;
+#   else
+#     echo 'Unknown service type. Please set SERVICE=app, SERVICE=mysql, or SERVICE=redis';
+#     exit 1;
+#   fi
+# "
+# ]
+ENTRYPOINT ["start.sh"]
