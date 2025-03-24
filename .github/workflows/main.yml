@@ -39,6 +39,8 @@ jobs:
           script: |
            sudo chown -R righting:righting /usr/local/projects/imags-lib-all/
            sudo chmod -R 755 /usr/local/projects/imags-lib-all/
+           sudo chown -R righting:righting /usr/local/projects/imags-lib-all/target
+           sudo chmod -R 755 /usr/local/projects/imags-lib-all/target
 
       - name: 启动 MySQL 和 Redis
         uses: appleboy/ssh-action@v0.1.10
