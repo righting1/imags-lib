@@ -10,7 +10,6 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     steps:
-      -
       # 1. 检出代码
       - name: 检出代码
         uses: actions/checkout@v3
