@@ -47,8 +47,13 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           password: ${{ secrets.SERVER_PASS }}
           script: |
-            docker run -d --name mysql-container -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=shizhan -e MYSQL_USER=root -e MYSQL_PASSWORD=root -p 3306:3306 mysql:8.0
-            docker run -d --name redis-container -p 6379:6379 redis:latest
+            cd /usr/local/projects/imags-lib-all/
+            docker-compose -f docker-compose.db.yml down
+            docker-compose -f docker-compose.db.yml up -d
+            
+            docker-compose -f docker-compose.redis.yml down
+            docker-compose -f docker-compose.redis.yml up -d
+            
 
       # 5. 通过ssh执行shell命令，在服务器上构建镜像并部署
       - name: 在服务器上构建镜像并部署
