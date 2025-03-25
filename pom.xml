@@ -60,8 +60,9 @@
         <dependency>
             <groupId>com.github.ben-manes.caffeine</groupId>
             <artifactId>caffeine</artifactId>
-            <version>3.1.8</version>
+            <version>2.9.3</version>
         </dependency>
+
         <!-- websocket -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -80,13 +81,14 @@
             <version>1.39.0</version>
         </dependency>
 
-        <!-- Sa-Token 整合 Redis （使用 jackson 序列化方式）
+       <!-- Sa-Token 整合 Redis （使用 jackson 序列化方式）-->
+
         <dependency>
             <groupId>cn.dev33</groupId>
             <artifactId>sa-token-redis-jackson</artifactId>
             <version>1.39.0</version>
         </dependency>
-        -->
+
 
         <!-- 提供Redis连接池  -->
         <dependency>
@@ -141,6 +143,7 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -213,28 +216,7 @@
 
             <!--      docker配置-->
             <!-- docker插件-->
-            <plugin>
-                <groupId>com.spotify</groupId>
-                <artifactId>docker-maven-plugin</artifactId>
-                <version>0.4.13</version>
-                <dependencies>
-                    <dependency>
-                        <groupId>javax.activation</groupId>
-                        <artifactId>activation</artifactId>
-                        <version>1.1</version>
-                    </dependency>
-                </dependencies>
 
-                <configuration>
-                    <!-- 远程Docker的地址 -->
-                    <!--我这里最开始时想设置一个属性，来给服务器的ip,因为我这个服务器的ip不是静态的，每次重启ip都会改变 -->
-                     <dockerHost>http://20.243.123.1:2375</dockerHost>
-                    <!-- 镜像名称、前缀、项目名 -->
-                     <imageName> sxl/imags-lib-all:latest</imageName>
-                    <!-- Dockerfile的位置  -->
-                    <dockerDirectory>src/main/docker</dockerDirectory>
-                </configuration>
-            </plugin>
         </plugins>
     </build>
 
