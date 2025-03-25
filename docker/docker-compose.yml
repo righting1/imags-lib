@@ -31,8 +31,9 @@ services:
     environment:
       - SERVICE=app
       - SPRING_PROFILES_ACTIVE=prod
-    volumes:
-      - /usr/local/projects/imags-lib-all/imags-lib-backend:/usr/local/projects/imags-lib-all/imags-lib-backend
+      #- --spring.profiles.active=prod
+    #volumes:
+    #  - /usr/local/projects/imags-lib-all/imags-lib-backend:/usr/local/projects/imags-lib-all/imags-lib-backend
     restart: always  # 总是重启
     networks:
       - app_network
