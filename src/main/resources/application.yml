@@ -16,6 +16,13 @@ spring:
   servlet:
     multipart:
       max-file-size: 10MB
+
+  # 数据库配置
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/imagsLibDb
+    username: root
+    password: root
   redis:
     database: 0
     host: 172.16.10.10
@@ -87,13 +94,13 @@ cos:
     host: https://imags-1324735823.cos.ap-guangzhou.myqcloud.com
     secretId: AKIDQBl7LVUULyUpwoSs3zoPpFajT7YkkW0G
     secretKey: 3sVt2zjFWYMwHMCoFUUHqT0KadieNVSF
-    region: guangzhou
+    region: ap-guangzhou
     bucket: imags-1324735823
 
 
 #https://imags-1324735823.cos.ap-guangzhou.myqcloud.com/public/test/%40EventListener%E5%A4%84%E7%90%86.png
 
-
+#{BucketName}.cos.{Region}.myqcloud.com
 
 
 ## 阿里云 AI 配置

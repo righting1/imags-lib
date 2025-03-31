@@ -6,9 +6,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.RandomUtil;
 import com.qcloud.cos.model.PutObjectResult;
-import com.qcloud.cos.model.ciModel.persistence.CIObject;
-import com.qcloud.cos.model.ciModel.persistence.ImageInfo;
-import com.qcloud.cos.model.ciModel.persistence.ProcessResults;
+import com.qcloud.cos.model.ciModel.persistence.*;
 import com.rightings.backed.config.CosClientConfig;
 import com.rightings.backed.exception.BusinessException;
 import com.rightings.backed.exception.ErrorCode;
@@ -59,7 +57,11 @@ public abstract class PictureUploadTemplate {
             // 4. 上传图片到对象存储
             PutObjectResult putObjectResult = cosManager.putPictureObject(uploadPath, file);
             // 5. 获取图片信息对象，封装返回结果
-            ImageInfo imageInfo = putObjectResult.getCiUploadResult().getOriginalInfo().getImageInfo();
+            //ImageInfo imageInfo = putObjectResult.getCiUploadResult().getOriginalInfo().getImageInfo();
+            CIUploadResult var1 = putObjectResult.getCiUploadResult();
+            OriginalInfo var2 = var1.getOriginalInfo();
+            ImageInfo var3 = var2.getImageInfo();
+            ImageInfo imageInfo = var3;
             // 获取到图片处理结果
             ProcessResults processResults = putObjectResult.getCiUploadResult().getProcessResults();
             List<CIObject> objectList = processResults.getObjectList();

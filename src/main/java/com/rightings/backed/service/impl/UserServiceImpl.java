@@ -8,6 +8,7 @@ import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.rightings.backed.constant.UserConstant;
@@ -71,10 +72,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         if (!userPassword.equals(checkPassword)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "两次输入的密码不一致");
         }
-        // 2. 检查用户账号是否和数据库中已有的重复
-        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("userAccount", userAccount);
+
+        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(User::getUserAccount, userAccount);
         long count = this.baseMapper.selectCount(queryWrapper);
+
+        // 2. 检查用户账号是否和数据库中已有的重复
+        //QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        //queryWrapper.eq("userAccount", userAccount);
+        //long count = this.baseMapper.selectCount(queryWrapper);
+
         if (count > 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "账号重复");
         }
@@ -84,7 +91,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         User user = new User();
         user.setUserAccount(userAccount);
         user.setUserPassword(encryptPassword);
-        user.setUserName("无名");
+        user.setUserName(userAccount);
         user.setUserRole(UserRoleEnum.USER.getValue());
         boolean saveResult = this.save(user);
         if (!saveResult) {
@@ -272,6 +279,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         // 3. 更新用户信息
         updateUserVipInfo(user, targetCode.getCode());
         return true;
+    }
+
+    @Override
+    public User getUserById(Long userId) {
+        //return getLoginUserById(userId);
+        return this.getById(userId);
     }
 
     /**

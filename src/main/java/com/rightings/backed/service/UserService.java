@@ -104,4 +104,7 @@ public interface UserService extends IService<User> {
      * 用户兑换会员（会员码兑换）
      */
     boolean exchangeVip(User user, String vipCode);
+
+    User getUserById(Long userId);
+
 }

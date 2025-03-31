@@ -176,4 +176,17 @@ public class UserController {
         return ResultUtils.success(result);
     }
 
+
+    /**
+     * 获取当前登录用户详情
+     */
+    @GetMapping("/profile")
+    public BaseResponse<User> getUserProfile(HttpServletRequest request) {
+        //Long userId = (Long) request.getSession().getAttribute("userId");
+        //User user = userService.getUserById(userId);
+        User user = userService.getLoginUser(request);
+        return ResultUtils.success(user);
+        //return user != null ? Response.success(user) : Response.error("用户不存在");
+    }
+
 }

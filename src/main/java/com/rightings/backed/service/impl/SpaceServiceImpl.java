@@ -99,8 +99,10 @@ public class SpaceServiceImpl extends ServiceImpl<SpaceMapper, Space>
                         .eq(Space::getUserId, userId)
                         .eq(Space::getSpaceType, space.getSpaceType())
                         .exists();
-                // 如果已有空间，就不能再创建
-                ThrowUtils.throwIf(exists, ErrorCode.OPERATION_ERROR, "每个用户每类空间只能创建一个");
+                // 管理员可以创建多个空间，但是普通用户只能创建一个
+                if(!userService.isAdmin(loginUser)){
+                    ThrowUtils.throwIf(exists, ErrorCode.OPERATION_ERROR, "每个用户每类空间只能创建一个");
+                }
                 // 创建
                 boolean result = this.save(space);
                 ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR, "保存空间到数据库失败");

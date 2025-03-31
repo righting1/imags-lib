@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rightings.backed.mapper.AccessKeysMapper">
+
+    <resultMap id="BaseResultMap" type="com.rightings.backed.model.entity.AccessKeys">
+        <id property="id" column="id" jdbcType="BIGINT"/>
+        <result property="userId" column="userId" jdbcType="BIGINT"/>
+        <result property="accessKey" column="accessKey" jdbcType="VARCHAR"/>
+        <result property="secretKey" column="secretKey" jdbcType="VARCHAR"/>
+        <result property="status" column="status" jdbcType="TINYINT"/>
+        <result property="createTime" column="createTime" jdbcType="TIMESTAMP"/>
+        <result property="updateTime" column="updateTime" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <!-- 定义基础查询字段 -->
+    <sql id="Base_Column_List">
+        id, userId, accessKey, secretKey, status, createTime, updateTime
+    </sql>
+</mapper>

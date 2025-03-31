@@ -122,3 +122,42 @@ ALTER TABLE user
     ADD COLUMN vipExpireTime datetime NULL COMMENT '会员过期时间',
     ADD COLUMN vipCode varchar(128) NULL COMMENT '会员兑换码',
     ADD COLUMN vipNumber bigint NULL COMMENT '会员编号';
+
+
+
+
+
+
+
+
+
+-- 接口表
+
+CREATE TABLE `interface_info` (
+                                  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键',
+                                  `name` varchar(256) NOT NULL COMMENT '名称',
+                                  `description` varchar(256) DEFAULT NULL COMMENT '描述',
+                                  `url` varchar(512) NOT NULL COMMENT '接口地址',
+                                  `requestParams` text COMMENT '请求参数',
+                                  `requestHeader` text COMMENT '请求头',
+                                  `responseHeader` text COMMENT '响应头',
+                                  `status` int NOT NULL DEFAULT '0' COMMENT '接口状态（0-关闭，1-开启）',
+                                  `method` varchar(256) NOT NULL COMMENT '请求类型',
+                                  `userId` bigint NOT NULL COMMENT '创建人',
+                                  `createTime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+                                  `updateTime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+                                  `isDelete` tinyint NOT NULL DEFAULT '0' COMMENT '是否删除(0-未删, 1-已删)',
+                                  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='接口信息';
+
+
+-- ak,sk分配表
+CREATE TABLE `access_keys ` (
+                             `id` BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键 ID',
+                             `userId` BIGINT NOT NULL COMMENT '创建 AK/SK 的用户 ID',
+                             `accessKey` VARCHAR(64) NOT NULL UNIQUE COMMENT '访问密钥 (AK)',
+                             `secretKey` VARCHAR(128) NOT NULL COMMENT '安全密钥 (SK)',
+                             `status` TINYINT NOT NULL DEFAULT 1 COMMENT '状态 (1: 启用, 0: 禁用, 2: 过期等)',
+                             `createTime` TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+                             `updateTime` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='API 访问密钥表';
