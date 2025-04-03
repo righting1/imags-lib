@@ -4,6 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.text.AntPathMatcher;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONArray;
@@ -15,9 +16,11 @@ import com.rightings.backed.constant.UserConstant;
 import com.rightings.backed.exception.BusinessException;
 import com.rightings.backed.exception.ErrorCode;
 import com.rightings.backed.manager.auth.StpKit;
+import com.rightings.backed.mapper.AccessKeysMapper;
 import com.rightings.backed.mapper.UserMapper;
 import com.rightings.backed.model.dto.user.UserQueryRequest;
 import com.rightings.backed.model.dto.user.VipCode;
+import com.rightings.backed.model.entity.AccessKeys;
 import com.rightings.backed.model.entity.User;
 import com.rightings.backed.model.enums.UserRoleEnum;
 import com.rightings.backed.model.vo.LoginUserVO;
@@ -33,9 +36,7 @@ import org.springframework.util.DigestUtils;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
@@ -48,6 +49,11 @@ import java.util.stream.Collectors;
 @Slf4j
 public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         implements UserService {
+
+    public static final List<String> NOT_LOGIN_PATH = Arrays.asList("/api/interface/**");
+
+    @javax.annotation.Resource
+    private AccessKeysMapper accessKeysMapper;
 
     /**
      * 用户注册
@@ -147,6 +153,23 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
     @Override
     public User getLoginUser(HttpServletRequest request) {
+
+        String serectKey = request.getHeader("accessKey");
+
+        String path = request.getRequestURI();
+        //String path = request.getPath().toString();
+        //判断请求路径是否需要登录
+        List<Boolean> collect = NOT_LOGIN_PATH.stream().map(notLoginPath -> {
+            AntPathMatcher antPathMatcher = new AntPathMatcher();
+            return antPathMatcher.match(notLoginPath, path);
+        }).collect(Collectors.toList());
+
+        if (collect.contains(true)){
+            AccessKeys accessKeys = accessKeysMapper.selectOne(new QueryWrapper<AccessKeys>().eq("accessKey", serectKey));
+
+            User User = getUserById(accessKeys.getUserId());
+            return User;
+        }
         // 判断是否已经登录
         Object userObj = request.getSession().getAttribute(UserConstant.USER_LOGIN_STATE);
         User currentUser = (User) userObj;

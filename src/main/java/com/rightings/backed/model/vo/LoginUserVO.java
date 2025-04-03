@@ -57,4 +57,10 @@ public class LoginUserVO implements Serializable {
     private Date updateTime;
 
     private static final long serialVersionUID = 1L;
+
+    public static class UserLikeCategoryVo {
+
+        public String category;
+        public Long likeCount;
+    }
 }

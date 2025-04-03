@@ -3,6 +3,10 @@ package com.rightings.backed.controller;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.metadata.OrderItem;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
@@ -23,6 +27,7 @@ import com.rightings.backed.manager.auth.SpaceUserAuthManager;
 import com.rightings.backed.manager.auth.StpKit;
 import com.rightings.backed.manager.auth.annotation.SaSpaceCheckPermission;
 import com.rightings.backed.manager.auth.model.SpaceUserPermissionConstant;
+import com.rightings.backed.mapper.PictureMapper;
 import com.rightings.backed.model.dto.picture.*;
 import com.rightings.backed.model.entity.Picture;
 import com.rightings.backed.model.entity.Space;
@@ -30,9 +35,12 @@ import com.rightings.backed.model.entity.User;
 import com.rightings.backed.model.enums.PictureReviewStatusEnum;
 import com.rightings.backed.model.vo.PictureTagCategory;
 import com.rightings.backed.model.vo.PictureVO;
+import com.rightings.backed.model.vo.UserLikeCategoryVo;
+import com.rightings.backed.service.PictureLikeService;
 import com.rightings.backed.service.PictureService;
 import com.rightings.backed.service.SpaceService;
 import com.rightings.backed.service.UserService;
+import com.rightings.backed.mapper.PictureLikeMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -40,13 +48,14 @@ import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import com.rightings.backed.model.entity.PictureLike;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.time.Duration;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * @author 程序员鱼皮 <a href="https://www.codefather.cn">编程导航原创项目</a>
@@ -73,6 +82,15 @@ public class PictureController {
 
     @Resource
     private SpaceUserAuthManager spaceUserAuthManager;
+
+    @Resource
+    private PictureLikeService pictureLikeService;
+
+    @Resource
+    private PictureLikeMapper pictureLikeMapper;
+
+    @Resource
+    private PictureMapper pictureMapper;
 
     /**
      * 本地缓存
@@ -122,6 +140,66 @@ public class PictureController {
         }
         User loginUser = userService.getLoginUser(request);
         pictureService.deletePicture(deleteRequest.getId(), loginUser);
+        return ResultUtils.success(true);
+    }
+
+    @PostMapping("/like")
+    public BaseResponse<Boolean> likePicture(@RequestBody DeleteRequest deleteRequest
+            , HttpServletRequest request) {
+        if (deleteRequest == null || deleteRequest.getId() <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        User loginUser = userService.getLoginUser(request);
+        Long userId = loginUser.getId();
+        Long pictureId = deleteRequest.getId();
+        PictureLike byUserPicture = pictureLikeService.getByUserPicture(userId, pictureId);
+
+        int count = pictureLikeMapper.checkLikeRecord(userId, pictureId);
+        if (byUserPicture == null){
+            pictureLikeMapper.insertLikeRecord(userId, pictureId);
+            //点赞数加一
+        } else {
+            pictureLikeMapper.updateLikeStatus(userId, pictureId);
+            Integer status = byUserPicture.getStatus();
+            if (status.equals(1)){
+                //点赞数减一
+
+                pictureMapper.update(
+                        null,
+                        new LambdaUpdateWrapper<Picture>()
+                                .setSql("likeCount = likeCount - 1")  // 直接执行 SQL 计算
+                                .eq(Picture::getId, pictureId)         // 指定条件
+                );
+
+            } else {
+                //点赞数加一
+
+                pictureMapper.update(
+                        null,
+                        new LambdaUpdateWrapper<Picture>()
+                                .setSql("likeCount = likeCount + 1")  // 直接执行 SQL 计算
+                                .eq(Picture::getId, pictureId)         // 指定条件
+                );
+            }
+        }
+        //pictureService.deletePicture(deleteRequest.getId(), loginUser);
+        return ResultUtils.success(true);
+    }
+
+
+    @PostMapping("/getLikeStatus")
+    public BaseResponse<Boolean> getLikeStatus(@RequestBody DeleteRequest deleteRequest
+            , HttpServletRequest request) {
+        if (deleteRequest == null || deleteRequest.getId() <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        User loginUser = userService.getLoginUser(request);
+        Long userId = loginUser.getId();
+        Long pictureId = deleteRequest.getId();
+        PictureLike byUserPicture = pictureLikeService.getByUserPicture(userId, pictureId);
+        if (byUserPicture == null || byUserPicture.getStatus().equals(0)){
+            return ResultUtils.success(false);
+        }
         return ResultUtils.success(true);
     }
 
@@ -250,6 +328,33 @@ public class PictureController {
         Page<Picture> picturePage = pictureService.page(new Page<>(current, size),
                 pictureService.getQueryWrapper(pictureQueryRequest));
         // 获取封装类
+        List<Picture> records = picturePage.getRecords();
+
+
+        User loginUser = userService.getLoginUser(request);
+        Long userId = loginUser.getId();
+
+        Map<String, Long> categoryWeightMap = new HashMap<>();
+        List<UserLikeCategoryVo> userLikeList = pictureLikeMapper.getUserLikeList(userId);
+
+// 1. 构建 category 权重映射
+        for (UserLikeCategoryVo userLikeCategoryVo : userLikeList) {
+            categoryWeightMap.put(userLikeCategoryVo.getCategory(), userLikeCategoryVo.getLikeCount());
+        }
+
+// 2. 按 category 权重进行排序（改为 `Long` 处理，避免类型问题）
+        List<Picture> sortedPictures = records.stream()
+                .sorted(Comparator.comparingLong(p -> categoryWeightMap.getOrDefault(p.getCategory(), 0L)))
+                .collect(Collectors.toList());
+
+        // 3. 输出排序结果
+        sortedPictures.forEach(p ->
+                System.out.println("ID: " + p.getId() + ", Name: " + p.getName() + ", Category: " + p.getCategory() +
+                        ", Weight: " + categoryWeightMap.getOrDefault(p.getCategory(), 0l))
+        );
+
+        Page<Picture> picturePage1 = new Page<>();
+        picturePage1.setRecords(sortedPictures);
         return ResultUtils.success(pictureService.getPictureVOPage(picturePage, request));
     }
 

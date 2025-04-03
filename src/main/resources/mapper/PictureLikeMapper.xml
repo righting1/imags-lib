@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rightings.backed.mapper.PictureLikeMapper">
+
+    <resultMap id="BaseResultMap" type="com.rightings.backed.model.entity.PictureLike">
+            <id property="id" column="id" />
+            <result property="userId" column="user_id" />
+            <result property="pictureId" column="picture_id" />
+            <result property="status" column="status" />
+            <result property="createTime" column="create_time" />
+            <result property="updateTime" column="update_time" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,user_id,picture_id,status,create_time,update_time
+    </sql>
+
+    <!-- 判断是否存在该用户ID和图片ID组成的记录 -->
+    <select id="checkLikeRecord" resultType="int">
+        SELECT COUNT(*)
+        FROM picture_like
+        WHERE user_id = #{userId}
+          AND picture_id = #{pictureId}
+    </select>
+
+    <!-- 创建点赞记录 -->
+    <insert id="insertLikeRecord">
+        INSERT INTO picture_like (user_id, picture_id, status,create_time,update_time)
+        VALUES (#{userId}, #{pictureId}, 1, now(), now())
+    </insert>
+
+    <!-- 更新点赞状态 -->
+    <update id="updateLikeStatus">
+        UPDATE picture_like
+        SET status = CASE
+                         WHEN status = 1 THEN 0
+                         ELSE 1
+            END,
+            update_time = NOW()
+        WHERE user_id = #{userId} AND picture_id = #{pictureId}
+    </update>
+
+    <resultMap id="UserLikeCategoryResultMap" type="com.rightings.backed.model.vo.UserLikeCategoryVo">
+        <result property="category" column="category"/>
+        <result property="likeCount" column="like_count"/>
+    </resultMap>
+
+    <select id="getUserLikeList" resultMap="UserLikeCategoryResultMap">
+        SELECT
+            p.category,
+            COUNT(*) AS like_count
+        FROM picture_like pl
+                 INNER JOIN picture p ON pl.picture_id = p.id
+        WHERE pl.user_id = #{userId} AND pl.status = 1
+        GROUP BY p.category
+        ORDER BY like_count DESC;
+    </select>
+
+</mapper>

@@ -10,9 +10,11 @@ import com.rightings.backed.constant.UserConstant;
 import com.rightings.backed.exception.BusinessException;
 import com.rightings.backed.exception.ErrorCode;
 import com.rightings.backed.exception.ThrowUtils;
+import com.rightings.backed.mapper.PictureLikeMapper;
 import com.rightings.backed.model.dto.user.*;
 import com.rightings.backed.model.entity.User;
 import com.rightings.backed.model.vo.LoginUserVO;
+import com.rightings.backed.model.vo.UserLikeCategoryVo;
 import com.rightings.backed.model.vo.UserVO;
 import com.rightings.backed.service.UserService;
 import org.springframework.beans.BeanUtils;
@@ -28,6 +30,9 @@ public class UserController {
 
     @Resource
     private UserService userService;
+
+    @Resource
+    private PictureLikeMapper pictureLikeMapper;
 
     /**
      * 用户注册
@@ -187,6 +192,13 @@ public class UserController {
         User user = userService.getLoginUser(request);
         return ResultUtils.success(user);
         //return user != null ? Response.success(user) : Response.error("用户不存在");
+    }
+
+
+    @GetMapping("/Tsetget") // ✅ 这里不需要 {id} 分类
+    public BaseResponse<Boolean> getUserProfile(@RequestParam("id") long id) {
+        List<UserLikeCategoryVo> userLikeList = pictureLikeMapper.getUserLikeList(id);
+        return ResultUtils.success(true);
     }
 
 }

@@ -161,3 +161,21 @@ CREATE TABLE `access_keys ` (
                              `createTime` TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
                              `updateTime` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='API 访问密钥表';
+
+-- 增加点赞表
+CREATE TABLE picture_like (
+                              id          BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '主键 ID',
+                              user_id     BIGINT NOT NULL COMMENT '用户 ID，点赞的用户',
+                              picture_id  BIGINT NOT NULL COMMENT '图片 ID，被点赞的图片',
+                              status      TINYINT NOT NULL DEFAULT 1 COMMENT '状态: 1=已点赞, 0=取消点赞',
+                              create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '点赞时间',
+                              update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+                              UNIQUE KEY uq_user_picture (user_id, picture_id) -- 确保用户对同一张图片只能点赞一次
+) COMMENT='用户-图片点赞关系表';
+
+
+
+
+-- 增加点赞信息
+ALTER TABLE picture
+    ADD COLUMN likeCount BIGINT DEFAULT 0 COMMENT '点赞数量';
