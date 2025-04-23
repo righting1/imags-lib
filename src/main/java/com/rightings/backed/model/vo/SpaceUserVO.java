@@ -21,7 +21,7 @@ public class SpaceUserVO implements Serializable {
     /**
      * 空间 id
      */
-    private Long spaceId;
+    private String spaceId;
 
     /**
      * 用户 id
@@ -82,6 +82,7 @@ public class SpaceUserVO implements Serializable {
         }
         SpaceUserVO spaceUserVO = new SpaceUserVO();
         BeanUtils.copyProperties(spaceUser, spaceUserVO);
+        spaceUserVO.setSpaceId(String.valueOf(spaceUser.getSpaceId()));
         return spaceUserVO;
     }
 }

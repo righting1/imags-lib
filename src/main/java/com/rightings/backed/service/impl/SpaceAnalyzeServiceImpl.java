@@ -56,6 +56,11 @@ public class SpaceAnalyzeServiceImpl extends ServiceImpl<SpaceMapper, Space>
             // 补充查询范围
             fillAnalyzeQueryWrapper(spaceUsageAnalyzeRequest, queryWrapper);
             List<Object> pictureObjList = pictureService.getBaseMapper().selectObjs(queryWrapper);
+
+            long usedSizexx=0;
+            for (Object x: pictureObjList) {
+                if(x!=null) usedSizexx+=(long)x;
+            }
             long usedSize = pictureObjList.stream().mapToLong(obj -> (Long) obj).sum();
             long usedCount = pictureObjList.size();
             // 封装返回结果

@@ -1,5 +1,6 @@
 package com.rightings.backed.controller;
 
+import cn.dev33.satoken.session.SaSession;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
@@ -106,14 +107,15 @@ public class PictureController {
      * 上传图片（可重新上传）
      */
     @PostMapping("/upload")
-    @SaSpaceCheckPermission(value = SpaceUserPermissionConstant.PICTURE_UPLOAD)
-//    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    //@SaSpaceCheckPermission(value = SpaceUserPermissionConstant.PICTURE_UPLOAD)
+    //@AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public BaseResponse<PictureVO> uploadPicture(
             @RequestPart("file") MultipartFile multipartFile,
             PictureUploadRequest pictureUploadRequest,
             HttpServletRequest request) {
         User loginUser = userService.getLoginUser(request);
         PictureVO pictureVO = pictureService.uploadPicture(multipartFile, pictureUploadRequest, loginUser);
+        System.out.println(pictureVO.getId());
         return ResultUtils.success(pictureVO);
     }
 
@@ -121,7 +123,7 @@ public class PictureController {
      * 通过 URL 上传图片（可重新上传）
      */
     @PostMapping("/upload/url")
-    @SaSpaceCheckPermission(value = SpaceUserPermissionConstant.PICTURE_UPLOAD)
+    //@SaSpaceCheckPermission(value = SpaceUserPermissionConstant.PICTURE_UPLOAD)
     public BaseResponse<PictureVO> uploadPictureByUrl(
             @RequestBody PictureUploadRequest pictureUploadRequest,
             HttpServletRequest request) {
@@ -132,7 +134,7 @@ public class PictureController {
     }
 
     @PostMapping("/delete")
-    @SaSpaceCheckPermission(value = SpaceUserPermissionConstant.PICTURE_DELETE)
+    //@SaSpaceCheckPermission(value = SpaceUserPermissionConstant.PICTURE_DELETE)
     public BaseResponse<Boolean> deletePicture(@RequestBody DeleteRequest deleteRequest
             , HttpServletRequest request) {
         if (deleteRequest == null || deleteRequest.getId() <= 0) {
@@ -265,7 +267,7 @@ public class PictureController {
         Space space = null;
         if (spaceId != null) {
             boolean hasPermission = StpKit.SPACE.hasPermission(SpaceUserPermissionConstant.PICTURE_VIEW);
-            ThrowUtils.throwIf(!hasPermission, ErrorCode.NO_AUTH_ERROR);
+            //ThrowUtils.throwIf(!hasPermission, ErrorCode.NO_AUTH_ERROR);
             // 已经改为使用注解鉴权
             // User loginUser = userService.getLoginUser(request);
             // pictureService.checkPictureAuth(loginUser, picture);
@@ -298,6 +300,7 @@ public class PictureController {
     /**
      * 分页获取图片列表（封装类）
      */
+    //@SaSpaceCheckPermission(value = SpaceUserPermissionConstant.PICTURE_DELETE)
     @PostMapping("/list/page/vo")
     public BaseResponse<Page<PictureVO>> listPictureVOByPage(@RequestBody PictureQueryRequest pictureQueryRequest,
                                                              HttpServletRequest request) {
@@ -313,8 +316,15 @@ public class PictureController {
             pictureQueryRequest.setReviewStatus(PictureReviewStatusEnum.PASS.getValue());
             pictureQueryRequest.setNullSpaceId(true);
         } else {
+            // 存储权限信息到 Session 中
+            //StpKit.SPACE.getSession().set("permissions", userPermissions);  // 存储权限列表
+            System.out.println("权限session1"+StpKit.SPACE);
+            //SaSession session = StpKit.SPACE.getSession();
+            //System.out.println("权限session"+session);
+            //Object permissions = StpKit.SPACE.getSession().get("permissions");
             boolean hasPermission = StpKit.SPACE.hasPermission(SpaceUserPermissionConstant.PICTURE_VIEW);
-            ThrowUtils.throwIf(!hasPermission, ErrorCode.NO_AUTH_ERROR);
+            //List<String> permissionList = spaceUserAuthManager.getPermissionList(space, loginUser);
+            //ThrowUtils.throwIf(!hasPermission, ErrorCode.NO_AUTH_ERROR);
             // 已经改为使用注解鉴权
 //            // 私有空间
 //            User loginUser = userService.getLoginUser(request);
@@ -327,6 +337,9 @@ public class PictureController {
         // 查询数据库
         Page<Picture> picturePage = pictureService.page(new Page<>(current, size),
                 pictureService.getQueryWrapper(pictureQueryRequest));
+        Page<PictureVO> x = new Page<>();
+
+        Page<PictureVO> pictureVOPage = pictureMapper.selectPageByCondition(x,pictureQueryRequest);
         // 获取封装类
         List<Picture> records = picturePage.getRecords();
 
@@ -412,7 +425,8 @@ public class PictureController {
      * 编辑图片（给用户使用）
      */
     @PostMapping("/edit")
-    @SaSpaceCheckPermission(value = SpaceUserPermissionConstant.PICTURE_EDIT)
+    //@SaSpaceCheckPermission(value = SpaceUserPermissionConstant.PICTURE_EDIT)
+    //1914300118053003266
     public BaseResponse<Boolean> editPicture(@RequestBody PictureEditRequest pictureEditRequest, HttpServletRequest request) {
         if (pictureEditRequest == null || pictureEditRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
@@ -502,7 +516,7 @@ public class PictureController {
      * 创建 AI 扩图任务
      */
     @PostMapping("/out_painting/create_task")
-    @SaSpaceCheckPermission(value = SpaceUserPermissionConstant.PICTURE_EDIT)
+    //@SaSpaceCheckPermission(value = SpaceUserPermissionConstant.PICTURE_EDIT)
     public BaseResponse<CreateOutPaintingTaskResponse> createPictureOutPaintingTask(@RequestBody CreatePictureOutPaintingTaskRequest createPictureOutPaintingTaskRequest,
                                                                                     HttpServletRequest request) {
         if (createPictureOutPaintingTaskRequest == null || createPictureOutPaintingTaskRequest.getPictureId() == null) {

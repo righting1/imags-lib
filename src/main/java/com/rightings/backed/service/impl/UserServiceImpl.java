@@ -1,5 +1,7 @@
 package com.rightings.backed.service.impl;
 
+import cn.dev33.satoken.stp.SaTokenInfo;
+import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateUtil;
@@ -15,6 +17,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.rightings.backed.constant.UserConstant;
 import com.rightings.backed.exception.BusinessException;
 import com.rightings.backed.exception.ErrorCode;
+import com.rightings.backed.manager.auth.SpaceUserAuthManager;
 import com.rightings.backed.manager.auth.StpKit;
 import com.rightings.backed.mapper.AccessKeysMapper;
 import com.rightings.backed.mapper.UserMapper;
@@ -28,6 +31,7 @@ import com.rightings.backed.model.vo.UserVO;
 import com.rightings.backed.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
@@ -54,6 +58,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
     @javax.annotation.Resource
     private AccessKeysMapper accessKeysMapper;
+
+    @Lazy
+    @javax.annotation.Resource
+    private SpaceUserAuthManager spaceUserAuthManager;
 
     /**
      * 用户注册
@@ -135,6 +143,24 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         // 记录用户登录态到 Sa-token，便于空间鉴权时使用，注意保证该用户信息与 SpringSession 中的信息过期时间一致
         StpKit.SPACE.login(user.getId());
         StpKit.SPACE.getSession().set(UserConstant.USER_LOGIN_STATE, user);
+
+        List<String> permissionList = spaceUserAuthManager.getPermissionList(null, user);
+        // 存储权限信息到 Session 中
+        StpKit.SPACE.getSession().set("permissions", permissionList);  // 存储权限列表
+
+
+        // 5. 获取当前用户的 Token
+        String token = StpKit.SPACE.getTokenValue();  // 获取生成的 Token
+
+
+        // 第3步，获取 Token  相关参数
+        SaTokenInfo tokenInfo = StpUtil.getTokenInfo();
+
+
+        // 6. 将 Token 返回给前端，前端可以将其保存在 localStorage 或 Cookie 中
+        //LoginUserVO loginUserVO = this.getLoginUserVO(user);
+        //loginUserVO.setToken(token);  // 把 Token 设置到 VO 对象中
+
         return this.getLoginUserVO(user);
     }
 
@@ -171,7 +197,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             return User;
         }
         // 判断是否已经登录
+        //request.getSession().setAttribute(UserConstant.USER_LOGIN_STATE, user);
         Object userObj = request.getSession().getAttribute(UserConstant.USER_LOGIN_STATE);
+        System.out.println(userObj);
         User currentUser = (User) userObj;
         if (currentUser == null || currentUser.getId() == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
@@ -198,6 +226,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         }
         LoginUserVO loginUserVO = new LoginUserVO();
         BeanUtil.copyProperties(user, loginUserVO);
+        loginUserVO.setId(user.getId().toString());
         return loginUserVO;
     }
 
@@ -214,6 +243,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         }
         UserVO userVO = new UserVO();
         BeanUtil.copyProperties(user, userVO);
+        userVO.setId(user.getId().toString());
         return userVO;
     }
 

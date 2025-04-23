@@ -148,6 +148,24 @@ public class UserController {
         return ResultUtils.success(true);
     }
 
+    @PostMapping("/myUpdate")
+    public BaseResponse<Boolean> myUpdateUser(@RequestBody UserUpdateRequest userUpdateRequest,HttpServletRequest httpServletRequest) {
+        if (userUpdateRequest == null || userUpdateRequest.getId() == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        Long userId = userUpdateRequest.getId();
+        BaseResponse<LoginUserVO> loginUser = getLoginUser(httpServletRequest);
+        String loginId = loginUser.getData().getId();
+        if (!loginId.equals(userId.toString())){
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
+        }
+        User user = new User();
+        BeanUtils.copyProperties(userUpdateRequest, user);
+        boolean result = userService.updateById(user);
+        ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
+        return ResultUtils.success(true);
+    }
+
     /**
      * 分页获取用户封装列表（仅管理员）
      *

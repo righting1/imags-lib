@@ -1,6 +1,7 @@
 package com.rightings.backed.config;
 
 import cn.hutool.core.text.AntPathMatcher;
+import com.rightings.backed.constant.UserConstant;
 import com.rightings.backed.exception.BusinessException;
 import com.rightings.backed.exception.ErrorCode;
 import com.rightings.backed.model.entity.AccessKeys;
@@ -46,6 +47,10 @@ public class SdkRequestWrapperFilter implements Filter {
         log.info("请求方法 (Method): {}", var.getMethod());
         log.info("请求参数 (Query String): {}", var.getQueryString());
         log.info("客户端 IP: {}", var.getRemoteAddr());
+        //request.getSession().setAttribute(UserConstant.USER_LOGIN_STATE, user);
+        Object userObj = var.getSession().getAttribute(UserConstant.USER_LOGIN_STATE);
+        System.out.println(userObj);
+
 
         // 记录请求头
         Enumeration<String> headerNames = var.getHeaderNames();

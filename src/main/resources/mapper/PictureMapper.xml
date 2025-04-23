@@ -39,4 +39,82 @@
         isDelete,reviewStatus,reviewMessage,
         reviewerId,reviewTime
     </sql>
+
+
+
+    <!-- 查询符合条件的分页数据 -->
+    <select id="selectPageByCondition" resultType="com.rightings.backed.model.vo.PictureVO">
+        SELECT
+        p.id,
+        p.url,
+        p.name,
+        p.introduction,
+        p.category,
+        p.tags,
+        p.picSize,
+        p.picWidth,
+        p.picHeight,
+        p.picScale,
+        p.picFormat,
+        p.userId,
+        p.createTime,
+        p.editTime,
+        p.updateTime,
+        p.isDelete,
+        p.reviewStatus,
+        p.reviewMessage,
+        p.reviewerId,
+        p.reviewTime,
+        p.thumbnailUrl,
+        p.spaceId,
+        p.picColor,
+        p.likeCount
+        FROM
+        picture p
+        WHERE
+        1=1
+        <if test="query.id != null">AND p.id = #{query.id}</if>
+        <if test="query.name != null">AND p.name LIKE CONCAT('%', #{query.name}, '%')</if>
+        <if test="query.introduction != null">AND p.introduction LIKE CONCAT('%', #{query.introduction}, '%')</if>
+        <if test="query.category != null">AND p.category = #{query.category}</if>
+
+        <if test="query.tags != null and query.tags.size() > 0">
+            AND
+            <foreach collection="query.tags" item="tag" separator="AND">
+                 p.tags LIKE CONCAT('%', #{tag}, '%') <!-- 对每个标签进行LIKE查询 -->
+            </foreach>
+        </if>
+
+        <if test="query.picSize != null">AND p.picSize = #{query.picSize}</if>
+        <if test="query.picWidth != null">AND p.picWidth = #{query.picWidth}</if>
+        <if test="query.picHeight != null">AND p.picHeight = #{query.picHeight}</if>
+        <if test="query.picScale != null">AND p.picScale = #{query.picScale}</if>
+        <if test="query.picFormat != null">AND p.picFormat = #{query.picFormat}</if>
+        <if test="query.userId != null">AND p.userId = #{query.userId}</if>
+        <if test="query.reviewStatus != null">AND p.reviewStatus = #{query.reviewStatus}</if>
+        <if test="query.spaceId != null">AND p.spaceId = #{query.spaceId}</if>
+        <if test="query.nullSpaceId != null and query.nullSpaceId == true">AND p.spaceId IS NULL</if>
+        <if test="query.startEditTime != null">AND p.editTime &gt;= #{query.startEditTime}</if>
+        <if test="query.endEditTime != null">AND p.editTime &lt;= #{query.endEditTime}</if>
+
+        <!-- 排序 -->
+        <if test="query.sortField != null and query.sortOrder != null">
+            ORDER BY
+            <choose>
+                <when test="query.sortField == 'createTime'">p.createTime</when>
+                <when test="query.sortField == 'name'">p.name</when>
+                <when test="query.sortField == 'picSize'">p.picSize</when>
+                <!-- 可以根据其他排序字段继续添加 -->
+                <otherwise>p.createTime</otherwise> <!-- 默认排序字段 -->
+            </choose>
+
+            <choose>
+                <when test="query.sortOrder == 'ascend'">ASC</when>
+                <when test="query.sortOrder == 'descend'">DESC</when>
+                <otherwise>DESC</otherwise> <!-- 默认排序方式 -->
+            </choose>
+        </if>
+
+    </select>
+
 </mapper>

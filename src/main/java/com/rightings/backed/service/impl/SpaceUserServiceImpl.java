@@ -123,7 +123,7 @@ public class SpaceUserServiceImpl extends ServiceImpl<SpaceUserMapper, SpaceUser
         // 3. 填充 SpaceUserVO 的用户和空间信息
         spaceUserVOList.forEach(spaceUserVO -> {
             Long userId = spaceUserVO.getUserId();
-            Long spaceId = spaceUserVO.getSpaceId();
+            String spaceId = spaceUserVO.getSpaceId();
             // 填充用户信息
             User user = null;
             if (userIdUserListMap.containsKey(userId)) {
@@ -132,8 +132,9 @@ public class SpaceUserServiceImpl extends ServiceImpl<SpaceUserMapper, SpaceUser
             spaceUserVO.setUser(userService.getUserVO(user));
             // 填充空间信息
             Space space = null;
-            if (spaceIdSpaceListMap.containsKey(spaceId)) {
-                space = spaceIdSpaceListMap.get(spaceId).get(0);
+            Long x = new Long(spaceId);
+            if (spaceIdSpaceListMap.containsKey(x)) {
+                space = spaceIdSpaceListMap.get(x).get(0);
             }
             spaceUserVO.setSpace(SpaceVO.objToVo(space));
         });

@@ -120,6 +120,7 @@ public class SpaceServiceImpl extends ServiceImpl<SpaceMapper, Space>
                 // 返回新写入的数据 id
                 return space.getId();
             });
+
             return Optional.ofNullable(newSpaceId).orElse(-1L);
         }
     }

@@ -1,7 +1,9 @@
 package com.rightings.backed.manager.auth.annotation;
 
+import cn.dev33.satoken.config.SaTokenConfig;
 import cn.dev33.satoken.interceptor.SaInterceptor;
 import cn.dev33.satoken.strategy.SaAnnotationStrategy;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -29,4 +31,7 @@ public class SaTokenConfigure implements WebMvcConfigurer {
             return AnnotatedElementUtils.getMergedAnnotation(element, annotationClass);
         };
     }
+
+
+
 }

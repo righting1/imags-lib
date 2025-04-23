@@ -46,11 +46,13 @@ public class SpaceController {
     private SpaceUserAuthManager spaceUserAuthManager;
 
     @PostMapping("/add")
-    public BaseResponse<Long> addSpace(@RequestBody SpaceAddRequest spaceAddRequest, HttpServletRequest request) {
+    public BaseResponse<String> addSpace(@RequestBody SpaceAddRequest spaceAddRequest, HttpServletRequest request) {
         ThrowUtils.throwIf(spaceAddRequest == null, ErrorCode.PARAMS_ERROR);
         User loginUser = userService.getLoginUser(request);
         long newId = spaceService.addSpace(spaceAddRequest, loginUser);
-        return ResultUtils.success(newId);
+        System.out.println("空间id "+newId);
+
+        return ResultUtils.success(new Long(newId).toString());
     }
 
     @PostMapping("/delete")

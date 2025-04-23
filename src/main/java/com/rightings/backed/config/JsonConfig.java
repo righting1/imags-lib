@@ -15,6 +15,7 @@ public class JsonConfig {
 
     /**
      * 添加 Long 转 json 精度丢失的配置
+     * TODO 为什么这里对Long转json精度丢失还会出现问题？？？ 不解 可能那些数字确实太大了？？？
      */
     @Bean
     public ObjectMapper jacksonObjectMapper(Jackson2ObjectMapperBuilder builder) {
@@ -22,6 +23,7 @@ public class JsonConfig {
         SimpleModule module = new SimpleModule();
         module.addSerializer(Long.class, ToStringSerializer.instance);
         module.addSerializer(Long.TYPE, ToStringSerializer.instance);
+        module.addSerializer(java.math.BigInteger.class, ToStringSerializer.instance);
         objectMapper.registerModule(module);
         return objectMapper;
     }

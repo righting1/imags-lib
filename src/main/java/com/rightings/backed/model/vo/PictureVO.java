@@ -16,7 +16,7 @@ public class PictureVO implements Serializable {
     /**
      * id
      */
-    private Long id;
+    private String id;
 
     /**
      * 图片 url
@@ -86,7 +86,7 @@ public class PictureVO implements Serializable {
     /**
      * 空间 id
      */
-    private Long spaceId;
+    private String spaceId;
 
     /**
      * 创建时间
@@ -138,6 +138,10 @@ public class PictureVO implements Serializable {
         }
         PictureVO pictureVO = new PictureVO();
         BeanUtils.copyProperties(picture, pictureVO);
+        pictureVO.setId(picture.getId().toString());
+        if (picture.getSpaceId()!=null ){
+            pictureVO.setSpaceId(picture.getSpaceId().toString());
+        }
         // 类型不同，需要转换
         pictureVO.setTags(JSONUtil.toList(picture.getTags(), String.class));
         return pictureVO;

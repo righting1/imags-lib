@@ -2,6 +2,7 @@ package com.rightings.backed.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
@@ -40,6 +41,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -68,6 +70,8 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
     @Resource
     private UserService userService;
 
+
+    @Lazy
     @Resource
     private SpaceService spaceService;
 
@@ -198,9 +202,15 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
             picture.setId(pictureId);
             picture.setEditTime(new Date());
         }
+        System.out.println(picture.getId());
         // 开启事务
         Long finalSpaceId = spaceId;
         transactionTemplate.execute(status -> {
+            System.out.println("picture你好"+picture);
+            if (picture.getId()== null){
+                long snowflakeId = IdUtil.getSnowflake(1, 1).nextId();
+                picture.setId(snowflakeId);
+            }
             // 插入数据
             boolean result = this.saveOrUpdate(picture);
             ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR, "图片上传失败，数据库操作失败");
@@ -213,10 +223,13 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
                         .update();
                 ThrowUtils.throwIf(!update, ErrorCode.OPERATION_ERROR, "额度更新失败");
             }
+
             return picture;
         });
         // 可自行实现，如果是更新，可以清理图片资源
         // this.clearPictureFile(oldPicture);
+        System.out.println("得到"+picture.getId());
+        System.out.println(PictureVO.objToVo(picture).getId());
         return PictureVO.objToVo(picture);
     }
 
@@ -504,9 +517,19 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         // 判断是否存在
         long id = pictureEditRequest.getId();
         Picture oldPicture = this.getById(id);
-        ThrowUtils.throwIf(oldPicture == null, ErrorCode.NOT_FOUND_ERROR);
+        if (oldPicture == null) {
+            // 可能是编辑了不存在的图片
+            // 补充审核参数
+            this.fillReviewParams(picture, loginUser);
+            // 操作数据库
+            boolean result = this.updateById(picture);
+            System.out.println(result);
+            // ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
+            return ;
+        }
+        //ThrowUtils.throwIf(oldPicture == null, ErrorCode.NOT_FOUND_ERROR);
         // 校验权限，已经改为使用注解鉴权
-//        checkPictureAuth(loginUser, oldPicture);
+        checkPictureAuth(loginUser, oldPicture);
         // 补充审核参数
         this.fillReviewParams(picture, loginUser);
         // 操作数据库
